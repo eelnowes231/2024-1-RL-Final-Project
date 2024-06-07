@@ -11,7 +11,7 @@ from recommender import DRRAgent
 
 import os
 ROOT_DIR = os.getcwd()
-DATA_DIR = os.path.join(ROOT_DIR, 'ml-1m/')
+DATA_DIR = os.path.join(ROOT_DIR, 'data/ml-1m/')
 STATE_SIZE = 10
 MAX_EPISODE_NUM = 8000
 

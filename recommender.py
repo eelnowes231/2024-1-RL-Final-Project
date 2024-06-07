@@ -51,7 +51,7 @@ class DRRAgent:
         # self.embedding_network = UserMovieEmbedding(users_num, self.embedding_dim)
         # self.embedding_network([np.zeros((1)),np.zeros((1,100))])
         self.save_model_weight_dir = ROOT_DIR + \
-            f"/save_model/trail-{datetime.now().strftime('%Y-%m-%d-%H')}"
+            f"/save_model/trail-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
         if not os.path.exists(self.save_model_weight_dir):
             os.makedirs(os.path.join(self.save_model_weight_dir, 'images'))
         embedding_save_file_dir = ROOT_DIR + '/save_weights/user_movie_embedding_case4.h5'
