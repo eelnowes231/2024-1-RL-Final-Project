@@ -5,6 +5,7 @@ import tensorflow as tf
 import pandas as pd
 from envs import OfflineEnv
 from recommender import DRRAgent
+from data import load_interact_dataset, load_whole_dataset
 """
 [Evaluation 방식 - Offline Evaluation (Algorithm 2)]
 - eval_user_list에서 한명씩 평가진행
@@ -91,37 +92,12 @@ def calculate_ndcg(rel, irel):
 
 
 if __name__ == "__main__":
-    print('Data loading...')
 
-    # Loading datasets
-    # ratings_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'ratings.dat'), 'r').readlines()]
-    # users_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'users.dat'), 'r').readlines()]
-    # movies_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'movies.dat'), encoding='latin-1').readlines()]
-    # ratings_df = pd.DataFrame(ratings_list, columns=['UserID', 'MovieID', 'Rating', 'Timestamp'], dtype=object)
-    # movies_df = pd.DataFrame(movies_list, columns=['MovieID', 'Title', 'Genres'])
-    # movies_df['MovieID'] = movies_df['MovieID'].apply(pd.to_numeric)
+    # Loading datasets - whole dataset 
+    # ratings_df, users_dict, users_history_lens, movies_id_to_movies = load_whole_dataset(DATA_DIR)
 
     # Loading dataset v2 - interacted items only  
-    ratings_df = pd.read_csv(os.path.join(DATA_DIR, 'ml_1m.inter'), sep=',', dtype=np.uint32)
-    ratings_df.columns = ['UserID', 'MovieID', 'Rating']
-
-    users_list = np.loadtxt(os.path.join(DATA_DIR, 'users.csv'), dtype=int)
-
-    movies_df = pd.read_csv(os.path.join(DATA_DIR, 'items.csv'), dtype=int)
-    movies_df.columns = ['MovieID']
-
-    print("Data loading complete!")
-    print("Data preprocessing...")
-
-    # 영화 id를 영화 제목으로
-    movies_id_to_movies = {movie[0]: movie[1:] for movie in movies_df.values}
-    ratings_df = ratings_df.applymap(int)
-
-    # 유저별로 본 영화들 순서대로 정리
-    users_dict = np.load(ROOT_DIR + '/data/user_dict.npy', allow_pickle=True)
-
-    # 각 유저별 영화 히스토리 길이
-    users_history_lens = np.load(ROOT_DIR + '/data/users_histroy_len.npy')
+    ratings_df, users_dict, users_history_lens, movies_id_to_movies = load_interact_dataset(DATA_DIR)
 
     users_num = max(ratings_df["UserID"])+1
     items_num = max(ratings_df["MovieID"])+1

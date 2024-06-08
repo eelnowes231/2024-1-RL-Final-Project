@@ -62,7 +62,6 @@ class OfflineEnv(object):
         
         reward = -0.5       # time step마다 -0.5 reward
 
-        # 일단 top_k 안함 
         if top_k:
             correctly_recommended = []
             rewards = []
@@ -70,7 +69,8 @@ class OfflineEnv(object):
                 # 추천한 movie가 user가 봤던 history에 있고, 최근 본 10개 중에 없다면 올바른 추천으로 취급
                 if act in self.user_items.keys() and act not in self.recommended_items:
                     correctly_recommended.append(act)
-                    rewards.append((self.user_items[act] - 3)/2)
+                    # rewards.append((self.user_items[act] - 3)/2)
+                    rewards.append((self.user_items[act]-1))
                 else:
                     # 추천한 movie가 user가 봤던 history에 없거나, 최근 본 10개 중에 있다면
                     rewards.append(-0.5)
@@ -96,7 +96,7 @@ class OfflineEnv(object):
             
             # 추천받은 movie에 action 추가
             self.recommended_items.add(action)
-
+        
         # 추천받은 item개수가 done_count보다 크거나, 추천받은 item 개수가 user의 history 길이보다 크거나 같다면
         # self.user -1 인 이유는 user id가 1부터 시작해서
         # 추천받은 item 개수가 user의 history 길이보다 크거나 같은지는 왜 체크하지? -> 같아지면 더 이상 추천할 영화 없음
