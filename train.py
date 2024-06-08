@@ -15,23 +15,18 @@ DATA_DIR = os.path.join(ROOT_DIR, 'data/ml-1m/')
 STATE_SIZE = 10
 MAX_EPISODE_NUM = 1000
 
-# os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 
 if __name__ == "__main__":
 
     print('Data loading...')
 
     # Loading datasets - whole dataset 
-    # ratings_list = [i.strip().split("::") for i in open(
-    #     os.path.join(DATA_DIR, 'ratings.dat'), 'r').readlines()]
-    # users_list = [i.strip().split("::") for i in open(
-    #     os.path.join(DATA_DIR, 'users.dat'), 'r').readlines()]
-    # movies_list = [i.strip().split("::") for i in open(
-    #     os.path.join(DATA_DIR, 'movies.dat'), encoding='latin-1').readlines()]
-    # ratings_df = pd.DataFrame(ratings_list, columns=[
-    #                           'UserID', 'MovieID', 'Rating', 'Timestamp'], dtype=np.uint32)
-    # movies_df = pd.DataFrame(movies_list, columns=[
-    #                          'MovieID', 'Title', 'Genres'])
+    # ratings_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'ratings.dat'), 'r').readlines()]
+    # users_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'users.dat'), 'r').readlines()]
+    # movies_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'movies.dat'), encoding='latin-1').readlines()]
+    # ratings_df = pd.DataFrame(ratings_list, columns=['UserID', 'MovieID', 'Rating', 'Timestamp'], dtype=object)
+    # movies_df = pd.DataFrame(movies_list, columns=['MovieID', 'Title', 'Genres'])
     # movies_df['MovieID'] = movies_df['MovieID'].apply(pd.to_numeric)
 
     # Loading dataset v2 - interacted items only  
@@ -75,4 +70,4 @@ if __name__ == "__main__":
                            STATE_SIZE, use_wandb=False)
     recommender.actor.build_networks()
     recommender.critic.build_networks()
-    recommender.train(MAX_EPISODE_NUM, load_model=False)
+    recommender.train(MAX_EPISODE_NUM, load_model=False, top_k=5)
