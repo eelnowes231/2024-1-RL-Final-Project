@@ -13,7 +13,7 @@ import os
 ROOT_DIR = os.getcwd()
 DATA_DIR = os.path.join(ROOT_DIR, 'data/ml-1m/')
 STATE_SIZE = 10
-MAX_EPISODE_NUM = 8000
+MAX_EPISODE_NUM = 1000
 
 # os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
@@ -21,31 +21,40 @@ if __name__ == "__main__":
 
     print('Data loading...')
 
-    # Loading datasets
-    ratings_list = [i.strip().split("::") for i in open(
-        os.path.join(DATA_DIR, 'ratings.dat'), 'r').readlines()]
-    users_list = [i.strip().split("::") for i in open(
-        os.path.join(DATA_DIR, 'users.dat'), 'r').readlines()]
-    movies_list = [i.strip().split("::") for i in open(
-        os.path.join(DATA_DIR, 'movies.dat'), encoding='latin-1').readlines()]
-    ratings_df = pd.DataFrame(ratings_list, columns=[
-                              'UserID', 'MovieID', 'Rating', 'Timestamp'], dtype=np.uint32)
-    movies_df = pd.DataFrame(movies_list, columns=[
-                             'MovieID', 'Title', 'Genres'])
-    movies_df['MovieID'] = movies_df['MovieID'].apply(pd.to_numeric)
+    # Loading datasets - whole dataset 
+    # ratings_list = [i.strip().split("::") for i in open(
+    #     os.path.join(DATA_DIR, 'ratings.dat'), 'r').readlines()]
+    # users_list = [i.strip().split("::") for i in open(
+    #     os.path.join(DATA_DIR, 'users.dat'), 'r').readlines()]
+    # movies_list = [i.strip().split("::") for i in open(
+    #     os.path.join(DATA_DIR, 'movies.dat'), encoding='latin-1').readlines()]
+    # ratings_df = pd.DataFrame(ratings_list, columns=[
+    #                           'UserID', 'MovieID', 'Rating', 'Timestamp'], dtype=np.uint32)
+    # movies_df = pd.DataFrame(movies_list, columns=[
+    #                          'MovieID', 'Title', 'Genres'])
+    # movies_df['MovieID'] = movies_df['MovieID'].apply(pd.to_numeric)
+
+    # Loading dataset v2 - interacted items only  
+    ratings_df = pd.read_csv(os.path.join(DATA_DIR, 'ml_1m.inter'), sep=',', dtype=np.uint32)
+    ratings_df.columns = ['UserID', 'MovieID', 'Rating']
+
+    users_list = np.loadtxt(os.path.join(DATA_DIR, 'users.csv'), dtype=int)
+
+    movies_df = pd.read_csv(os.path.join(DATA_DIR, 'items.csv'), dtype=int)
+    movies_df.columns = ['MovieID']
 
     print("Data loading complete!")
     print("Data preprocessing...")
 
-    # 영화 id를 영화 제목으로
-    movies_id_to_movies = {movie[0]: movie[1:] for movie in movies_list}
+    # 영화 id를 영화 제목으로 - 안쓸거임
+    movies_id_to_movies = {movie[0]: movie[0:] for movie in movies_df.values}
     ratings_df = ratings_df.applymap(int)
 
     # 유저별로 본 영화들 순서대로 정리
-    users_dict = np.load(ROOT_DIR + '/data/user_dict.npy', allow_pickle=True)
+    users_dict = np.load(DATA_DIR + '/user_dict_new.npy', allow_pickle=True)
 
     # 각 유저별 영화 히스토리 길이
-    users_history_lens = np.load(ROOT_DIR + '/data/users_histroy_len.npy')
+    users_history_lens = np.load(DATA_DIR + '/users_histroy_len_new.npy')
 
     users_num = max(ratings_df["UserID"])+1
     items_num = max(ratings_df["MovieID"])+1

@@ -57,7 +57,7 @@ class DRRAgent:
         embedding_save_file_dir = ROOT_DIR + '/save_weights/user_movie_embedding_case4.h5'
         assert os.path.exists(
             embedding_save_file_dir), f"embedding save file directory: '{embedding_save_file_dir}' is wrong."
-        self.embedding_network.load_weights(embedding_save_file_dir)
+        # self.embedding_network.load_weights(embedding_save_file_dir)
 
         self.srm_ave = DRRAveStateRepresentation(self.embedding_dim)
         self.srm_ave([np.zeros((1, 100,)), np.zeros((1, state_size, 100))])
@@ -77,8 +77,7 @@ class DRRAgent:
         # wandb
         self.use_wandb = use_wandb
         if use_wandb:
-            wandb.init(project="drr",
-                       entity="diominor",
+            wandb.init(project="RL-MM-DRR",
                        config={'users_num': users_num,
                                'items_num': items_num,
                                'state_size': state_size,
