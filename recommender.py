@@ -95,8 +95,7 @@ class DRRAgent:
     def calculate_td_target(self, rewards, q_values, dones):
         y_t = np.copy(q_values)
         for i in range(q_values.shape[0]):
-            y_t[i] = rewards[i] + (1 - dones[i]) * \
-                (self.discount_factor * q_values[i])
+            y_t[i] = rewards[i] + (1 - dones[i]) * (self.discount_factor * q_values[i])
         return y_t
 
     def recommend_item(self, action, recommended_items, top_k=False, items_ids=None):
@@ -140,17 +139,14 @@ class DRRAgent:
             # print(f'user_id : {user_id}, rated_items_length:{len(self.env.user_items)}')
             # print('items : ', self.env.get_items_names(items_ids))
             while not done:
-
                 # Observe current state & Find action
                 # Embedding 해주기
-                user_eb = self.embedding_network.get_layer(
-                    'user_embedding')(np.array(user_id))
-                items_eb = self.embedding_network.get_layer(
-                    'movie_embedding')(np.array(items_ids))
+                user_eb = self.embedding_network.get_layer('user_embedding')(np.array(user_id))
+                items_eb = self.embedding_network.get_layer('movie_embedding')(np.array(items_ids))
                 # items_eb = self.m_embedding_network.get_layer('movie_embedding')(np.array(items_ids))
+
                 # SRM으로 state 출력
-                state = self.srm_ave(
-                    [np.expand_dims(user_eb, axis=0), np.expand_dims(items_eb, axis=0)])
+                state = self.srm_ave([np.expand_dims(user_eb, axis=0), np.expand_dims(items_eb, axis=0)])
 
                 # Action(ranking score) 출력
                 action = self.actor.network(state)
@@ -161,22 +157,17 @@ class DRRAgent:
                     action += np.random.normal(0, self.std, size=action.shape)
 
                 # Item 추천
-                recommended_item = self.recommend_item(
-                    action, self.env.recommended_items, top_k=top_k)
+                recommended_item = self.recommend_item(action, self.env.recommended_items, top_k=top_k)
 
                 # Calculate reward & observe new state (in env)
                 # Step
-                next_items_ids, reward, done, _ = self.env.step(
-                    recommended_item, top_k=top_k)
+                next_items_ids, reward, done, _ = self.env.step(recommended_item, top_k=top_k)
                 if top_k:
                     reward = np.sum(reward)
-
                 # get next_state
-                next_items_eb = self.embedding_network.get_layer(
-                    'movie_embedding')(np.array(next_items_ids))
+                next_items_eb = self.embedding_network.get_layer('movie_embedding')(np.array(next_items_ids))
                 # next_items_eb = self.m_embedding_network.get_layer('movie_embedding')(np.array(next_items_ids))
-                next_state = self.srm_ave(
-                    [np.expand_dims(user_eb, axis=0), np.expand_dims(next_items_eb, axis=0)])
+                next_state = self.srm_ave([np.expand_dims(user_eb, axis=0), np.expand_dims(next_items_eb, axis=0)])
 
                 # buffer에 저장
                 self.buffer.append(state, action, reward, next_state, done)
@@ -207,8 +198,7 @@ class DRRAgent:
                     # print(td_targets.shape)
                     # raise Exception
                     # Update critic network
-                    q_loss += self.critic.train([batch_actions,
-                                                batch_states], td_targets, weight_batch)
+                    q_loss += self.critic.train([batch_actions, batch_states], td_targets, weight_batch)
 
                     # Update actor network
                     s_grads = self.critic.dq_da([batch_actions, batch_states])
