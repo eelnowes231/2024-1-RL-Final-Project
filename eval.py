@@ -94,18 +94,27 @@ if __name__ == "__main__":
     print('Data loading...')
 
     # Loading datasets
-    ratings_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'ratings.dat'), 'r').readlines()]
-    users_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'users.dat'), 'r').readlines()]
-    movies_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'movies.dat'), encoding='latin-1').readlines()]
-    ratings_df = pd.DataFrame(ratings_list, columns=['UserID', 'MovieID', 'Rating', 'Timestamp'], dtype=object)
-    movies_df = pd.DataFrame(movies_list, columns=['MovieID', 'Title', 'Genres'])
-    movies_df['MovieID'] = movies_df['MovieID'].apply(pd.to_numeric)
+    # ratings_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'ratings.dat'), 'r').readlines()]
+    # users_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'users.dat'), 'r').readlines()]
+    # movies_list = [i.strip().split("::") for i in open(os.path.join(DATA_DIR, 'movies.dat'), encoding='latin-1').readlines()]
+    # ratings_df = pd.DataFrame(ratings_list, columns=['UserID', 'MovieID', 'Rating', 'Timestamp'], dtype=object)
+    # movies_df = pd.DataFrame(movies_list, columns=['MovieID', 'Title', 'Genres'])
+    # movies_df['MovieID'] = movies_df['MovieID'].apply(pd.to_numeric)
+
+    # Loading dataset v2 - interacted items only  
+    ratings_df = pd.read_csv(os.path.join(DATA_DIR, 'ml_1m.inter'), sep=',', dtype=np.uint32)
+    ratings_df.columns = ['UserID', 'MovieID', 'Rating']
+
+    users_list = np.loadtxt(os.path.join(DATA_DIR, 'users.csv'), dtype=int)
+
+    movies_df = pd.read_csv(os.path.join(DATA_DIR, 'items.csv'), dtype=int)
+    movies_df.columns = ['MovieID']
 
     print("Data loading complete!")
     print("Data preprocessing...")
 
     # 영화 id를 영화 제목으로
-    movies_id_to_movies = {movie[0]: movie[1:] for movie in movies_list}
+    movies_id_to_movies = {movie[0]: movie[1:] for movie in movies_df.values}
     ratings_df = ratings_df.applymap(int)
 
     # 유저별로 본 영화들 순서대로 정리
