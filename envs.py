@@ -69,8 +69,8 @@ class OfflineEnv(object):
                 # 추천한 movie가 user가 봤던 history에 있고, 최근 본 10개 중에 없다면 올바른 추천으로 취급
                 if act in self.user_items.keys() and act not in self.recommended_items:
                     correctly_recommended.append(act)
-                    # rewards.append((self.user_items[act] - 3)/2)
-                    rewards.append((self.user_items[act]-1))
+                    rating = self.user_items[act]
+                    rewards.append((rating-2))
                 else:
                     # 추천한 movie가 user가 봤던 history에 없거나, 최근 본 10개 중에 있다면
                     rewards.append(-0.5)

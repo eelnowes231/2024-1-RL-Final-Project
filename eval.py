@@ -112,8 +112,8 @@ if __name__ == "__main__":
     time.sleep(2)
 
     #######################################################
-    saved_actor = './save_model/trail-2024-06-07-16-59-23/actor_8000_fixed.h5'
-    saved_critic = './save_model/trail-2024-06-07-16-59-23/critic_8000_fixed.h5'
+    saved_actor = './save_model/trail-2024-06-08-22-32-48/actor_8000_fixed.h5'
+    saved_critic = './save_model/trail-2024-06-08-22-32-48/critic_8000_fixed.h5'
 
     tf.keras.backend.set_floatx('float64')
 
@@ -126,6 +126,12 @@ if __name__ == "__main__":
 
     for i, user_id in enumerate(eval_users_dict.keys()):
         env = OfflineEnv(eval_users_dict, users_history_lens, movies_id_to_movies, STATE_SIZE, fix_user_id=user_id)
+
+        # user의 history가 STATE_SIZE 보다 작으면 pass
+        if len(env.items) < STATE_SIZE: 
+            print("User's history length < STATE_SIZE") 
+            continue
+
         recommender = DRRAgent(env, users_num, items_num, STATE_SIZE)
         recommender.actor.build_networks()
         recommender.critic.build_networks()
@@ -134,8 +140,8 @@ if __name__ == "__main__":
         sum_precision += precision
         sum_ndcg += ndcg
 
-        if i > end_evaluation:
-            break
+        # if i > end_evaluation:
+        #     break
 
     print("\n[FINAL RESULT]")
     print(f'precision@{TOP_K} : {sum_precision/len(eval_users_dict)}, ndcg@{TOP_K} : {sum_ndcg/len(eval_users_dict)}')

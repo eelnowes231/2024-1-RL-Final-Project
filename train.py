@@ -33,8 +33,7 @@ if __name__ == "__main__":
     # Training setting
     train_users_num = int(users_num * 0.8)
     train_items_num = items_num
-    train_users_dict = {k: users_dict.item().get(k)
-                        for k in range(train_users_num)}
+    train_users_dict = {k: users_dict.item().get(k) for k in range(train_users_num)}
     train_users_history_lens = users_history_lens[:train_users_num]
 
     print('DONE!')
