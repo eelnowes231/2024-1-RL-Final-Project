@@ -59,7 +59,7 @@ def get_dataloader(user_posItem_pairs, user_posItems_dict, batch_size, negative_
         
         
 class UserMovieEmbedding(tf.keras.Model):
-    def __init__(self, len_users, len_movies, embedding_dim, modality=('image', 'audio', 'text'), fusion='early', aggregation='concat'):
+    def __init__(self, len_users, len_movies, embedding_dim, modality=('video', 'audio', 'text'), fusion='early', aggregation='concat'):
         super(UserMovieEmbedding, self).__init__()
         self.modality = modality
         self.fusion = fusion
@@ -68,19 +68,21 @@ class UserMovieEmbedding(tf.keras.Model):
         # input: (user, movie)
         self.m_u_input = tf.keras.layers.InputLayer(name='input_layer', input_shape=(2,))
         
-        # load multimodal features
-        for mod in modality:
-            setattr(self, f'{mod}_feat', np.load(f'{DATA_DIR}/{mod}_feat.npy'))
-        
-        # embedding
+        # user embedding
         self.u_embedding = tf.keras.layers.Embedding(name='user_embedding', input_dim=len_users, output_dim=embedding_dim)
         
+        # item embedding        
         if not modality:
             self.m_embedding = tf.keras.layers.Embedding(name='movie_embedding', input_dim=len_movies, output_dim=embedding_dim)
-            
         else:
+            # load multimodal features
+            for mod in modality:
+                mod_name = 'image' if mod == 'video' else mod # rename due to file name
+                setattr(self, f'{mod}_feat', np.load(f'{DATA_DIR}/{mod_name}_feat.npy'))
+                
             if fusion == 'early':
                 self.mm_fc = tf.keras.layers.Dense(embedding_dim, name='mm_fc')
+                
             elif fusion == 'late':
                 if aggregation == 'concat':
                     def divide_integer(n, parts):
@@ -109,6 +111,7 @@ class UserMovieEmbedding(tf.keras.Model):
             for mod in self.modality:
                 mm_feat = getattr(self, f'{mod}_feat')
                 mm_feat = tf.gather(mm_feat, x[1])
+                
                 if self.fusion == 'early':
                     mm_emb.append(mm_feat)
                 elif self.fusion == 'late':
@@ -128,7 +131,7 @@ class UserMovieEmbedding(tf.keras.Model):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='pretrain embedding')
-    parser.add_argument('--epoch', type=int, default=150, help='Number of epochs')
+    parser.add_argument('--epoch', type=int, default=100, help='Number of epochs')
     parser.add_argument('--embed_dim', type=int, default=64, help='Embedding dimension')
     parser.add_argument('--batch_size', type=int, default=64, help='Batch size')
     parser.add_argument('--modality', type=str, help='Modality')
@@ -141,16 +144,22 @@ if __name__ == "__main__":
     ROOT_DIR = os.getcwd()
     DATA_DIR = os.path.join(ROOT_DIR, 'data/ml-1m/')
     
-    num_user = 6039
-    num_item = 2819
-    
     users_dict = np.load(DATA_DIR + '/user_dict_new.npy', allow_pickle=True).item()
+    
+    user_ids = set(users_dict.keys())
+    item_ids = set()
+    for value in users_dict.values():
+        for item_id, _ in value:
+            item_ids.add(item_id)
+    num_user, num_item = len(user_ids), len(item_ids)
+    
     u_m_pairs, u_m_dict = get_user_posItem(users_dict)
     
     u_m_model = UserMovieEmbedding(num_user, num_item, args.embed_dim,
                                    modality=args.modality,
                                    fusion=args.fusion,
                                    aggregation=args.aggregation)
+    
     optimizer = tf.keras.optimizers.Adam()
     bce = tf.keras.losses.BinaryCrossentropy()
     
@@ -182,7 +191,10 @@ if __name__ == "__main__":
 
         # u_m_losses.append(u_m_train_loss.result())
 
-    mod_name = str([mod[0] for mod in args.modality]).capitalize()
-    weights_name = f'{mod_name}_{args.fusion}_{args.aggregation}_{args.embed_dim}'
+    if args.modality:
+        mod_name = ''.join([mod[0] for mod in args.modality]).upper()
+        weights_name = f'{mod_name}_{args.fusion}_{args.aggregation}'
+    else:
+        weights_name = f'ID'
     u_m_model.save_weights(f'{ROOT_DIR}/save_weights/u_m_model_{weights_name}.h5')
     
