@@ -100,7 +100,7 @@ class UserMovieEmbedding(tf.keras.Model):
         # output
         self.m_u_fc = tf.keras.layers.Dense(1, activation='sigmoid')
         
-    def call(self, x):
+    def get_embedding(self, x):
         x = self.m_u_input(x)
         uemb = self.u_embedding(x[0])
         
@@ -124,7 +124,10 @@ class UserMovieEmbedding(tf.keras.Model):
                 
             if self.fusion == 'early':
                 memb = self.mm_fc(memb)
+        return uemb, memb
         
+    def call(self, x):
+        uemb, memb = self.get_embedding(x)
         m_u = self.m_u_merge([memb, uemb])
         return self.m_u_fc(m_u)
         
