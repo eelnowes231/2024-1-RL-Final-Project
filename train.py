@@ -5,6 +5,7 @@ import tensorflow as tf
 import itertools
 import matplotlib.pyplot as plt
 import time
+import argparse
 
 from data import load_interact_dataset, load_whole_dataset
 from envs import OfflineEnv
@@ -19,7 +20,13 @@ MAX_EPISODE_NUM = 8000
 os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 
 if __name__ == "__main__":
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--modality', type=str, help='Modality')
+    parser.add_argument('--fusion', type=str, help='Fusion')
+    parser.add_argument('--aggregation', type=str, help='Aggregation')
+    args = parser.parse_args()
+    if args.modality:
+        args.modality = tuple(args.modality.split(','))
     # Loading datasets - whole dataset 
     # ratings_df, users_dict, users_history_lens, movies_id_to_movies = load_whole_dataset(DATA_DIR)
 
@@ -45,7 +52,7 @@ if __name__ == "__main__":
     print(f"Available number of users: {len(env.available_users)}")
   
     recommender = DRRAgent(env, users_num, items_num,
-                           STATE_SIZE, use_wandb=False)
+                           STATE_SIZE, args, use_wandb=False)
     recommender.actor.build_networks()
     recommender.critic.build_networks()
     recommender.train(MAX_EPISODE_NUM, load_model=False, top_k=TOP_K)

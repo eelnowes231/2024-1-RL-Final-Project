@@ -18,7 +18,7 @@ ROOT_DIR = os.getcwd()
 
 class DRRAgent:
 
-    def __init__(self, env, users_num, items_num, state_size, is_test=False, use_wandb=False):
+    def __init__(self, env, users_num, items_num, state_size, args, is_test=False, use_wandb=False):
 
         self.env = env
 
@@ -46,7 +46,8 @@ class DRRAgent:
         # self.m_embedding_network.load_weights('/home/diominor/Workspace/DRR/save_weights/m_g_model_weights.h5')
 
         self.embedding_network = UserMovieEmbedding(
-            users_num, items_num, self.embedding_dim)
+            users_num, items_num, self.embedding_dim,
+            args.modality, args.fusion, args.aggregation)
         self.embedding_network([np.zeros((1,)), np.zeros((1,))])
         # self.embedding_network = UserMovieEmbedding(users_num, self.embedding_dim)
         # self.embedding_network([np.zeros((1)),np.zeros((1,100))])
@@ -54,10 +55,15 @@ class DRRAgent:
             f"/save_model/trail-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
         if not os.path.exists(self.save_model_weight_dir):
             os.makedirs(os.path.join(self.save_model_weight_dir, 'images'))
-        embedding_save_file_dir = ROOT_DIR + '/save_weights/user_movie_embedding_case4.h5'
-        assert os.path.exists(
-            embedding_save_file_dir), f"embedding save file directory: '{embedding_save_file_dir}' is wrong."
-        # self.embedding_network.load_weights(embedding_save_file_dir)
+            
+        if args.modality:
+            mod_name = ''.join([mod[0] for mod in args.modality]).upper()
+            weights_name = f'{mod_name}_{args.fusion}_{args.aggregation}'
+        else:
+            weights_name = f'ID'
+        embedding_save_file_dir = os.path.join(ROOT_DIR, 'save_weights', f'u_m_model_{weights_name}.h5')
+        assert os.path.exists(embedding_save_file_dir), f"embedding save file directory: '{embedding_save_file_dir}' is wrong."
+        self.embedding_network.load_weights(embedding_save_file_dir)
 
         self.srm_ave = DRRAveStateRepresentation(self.embedding_dim)
         self.srm_ave([np.zeros((1, 100,)), np.zeros((1, state_size, 100))])
@@ -103,8 +109,9 @@ class DRRAgent:
             items_ids = np.array(
                 list(set(i for i in range(self.items_num)) - recommended_items))
 
-        items_ebs = self.embedding_network.get_layer(
-            'movie_embedding')(items_ids)
+        # items_ebs = self.embedding_network.get_layer(
+        #     'movie_embedding')(items_ids)
+        _, items_ebs = self.embedding_network.get_embedding([np.zeros_like(items_ids), np.array(items_ids)])
         # items_ebs = self.m_embedding_network.get_layer('movie_embedding')(items_ids)
         action = tf.transpose(action, perm=(1, 0))
         if top_k:
@@ -141,8 +148,9 @@ class DRRAgent:
             while not done:
                 # Observe current state & Find action
                 # Embedding 해주기
-                user_eb = self.embedding_network.get_layer('user_embedding')(np.array(user_id))
-                items_eb = self.embedding_network.get_layer('movie_embedding')(np.array(items_ids))
+                # user_eb = self.embedding_network.get_layer('user_embedding')(np.array(user_id))
+                # items_eb = self.embedding_network.get_layer('movie_embedding')(np.array(items_ids))
+                user_eb, items_eb = self.embedding_network.get_embedding([np.array(user_id), np.array(items_ids)])
                 # items_eb = self.m_embedding_network.get_layer('movie_embedding')(np.array(items_ids))
 
                 # SRM으로 state 출력
@@ -165,7 +173,8 @@ class DRRAgent:
                 if top_k:
                     reward = np.sum(reward)
                 # get next_state
-                next_items_eb = self.embedding_network.get_layer('movie_embedding')(np.array(next_items_ids))
+                # next_items_eb = self.embedding_network.get_layer('movie_embedding')(np.array(next_items_ids))
+                _, next_items_eb = self.embedding_network.get_embedding([np.zeros_like(next_items_ids), np.array(next_items_ids)])
                 # next_items_eb = self.m_embedding_network.get_layer('movie_embedding')(np.array(next_items_ids))
                 next_state = self.srm_ave([np.expand_dims(user_eb, axis=0), np.expand_dims(next_items_eb, axis=0)])
 
