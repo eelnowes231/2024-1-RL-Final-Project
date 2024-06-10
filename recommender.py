@@ -25,7 +25,7 @@ class DRRAgent:
         self.users_num = users_num
         self.items_num = items_num
 
-        self.embedding_dim = 100
+        self.embedding_dim = 64
         self.actor_hidden_dim = 128
         self.actor_learning_rate = 0.001
         self.critic_hidden_dim = 128

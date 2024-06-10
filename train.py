@@ -15,7 +15,6 @@ import os
 ROOT_DIR = os.getcwd()
 DATA_DIR = os.path.join(ROOT_DIR, 'data/ml-1m/')
 STATE_SIZE = 5
-MAX_EPISODE_NUM = 8000
 
 os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 
@@ -24,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--modality', type=str, help='Modality')
     parser.add_argument('--fusion', type=str, help='Fusion')
     parser.add_argument('--aggregation', type=str, help='Aggregation')
+    parser.add_argument('--max_episode_num', type=int, default=8000, help='Number of episodes')
     args = parser.parse_args()
     if args.modality:
         args.modality = tuple(args.modality.split(','))
@@ -55,4 +55,4 @@ if __name__ == "__main__":
                            STATE_SIZE, args, use_wandb=False)
     recommender.actor.build_networks()
     recommender.critic.build_networks()
-    recommender.train(MAX_EPISODE_NUM, load_model=False, top_k=TOP_K)
+    recommender.train(args.max_episode_num, load_model=False, top_k=TOP_K)
