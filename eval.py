@@ -5,7 +5,7 @@ import tensorflow as tf
 import pandas as pd
 from envs import OfflineEnv
 from recommender import DRRAgent
-from data import load_dataset
+from data import load_dataset, load_dataset_session
 import argparse
 """
 [Evaluation 방식 - Offline Evaluation (Algorithm 2)]
@@ -101,11 +101,12 @@ if __name__ == "__main__":
         args.modality = tuple(args.modality.split(','))
 
     # Loading dataset 
-    users_num, items_num, eval_users_dict, users_history_lens, movies_id_to_movies = load_dataset(DATA_DIR, 'eval')
+    # total_users_num, total_items_num, eval_users_dict, users_history_lens, movies_id_to_movies = load_dataset(DATA_DIR, 'eval')
+    total_users_num, total_items_num, eval_users_dict, users_history_lens, movies_id_to_movies = load_dataset_session(DATA_DIR, 'eval')
 
     #######################################################
-    saved_actor = './save_model/trail-2024-06-11-16-30-52/actor_1000_fixed.h5'
-    saved_critic = './save_model/trail-2024-06-11-16-30-52/critic_1000_fixed.h5'
+    saved_actor = './save_model/trail-2024-06-11-17-32-29/actor_1000_fixed.h5'
+    saved_critic = './save_model/trail-2024-06-11-17-32-29/critic_1000_fixed.h5'
 
     tf.keras.backend.set_floatx('float64')
 
@@ -116,7 +117,7 @@ if __name__ == "__main__":
     for i, user_id in enumerate(eval_users_dict.keys()):
         env = OfflineEnv(eval_users_dict, users_history_lens, movies_id_to_movies, STATE_SIZE, fix_user_id=user_id)
 
-        recommender = DRRAgent(env, 6039, items_num, STATE_SIZE, args, use_wandb=False)
+        recommender = DRRAgent(env, total_users_num, total_items_num, STATE_SIZE, args, use_wandb=False)
         recommender.actor.build_networks()
         recommender.critic.build_networks()
         recommender.load_model(saved_actor, saved_critic)

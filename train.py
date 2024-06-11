@@ -2,7 +2,7 @@
 import os
 import argparse
 
-from data import load_dataset
+from data import load_dataset, load_dataset_session
 from envs import OfflineEnv
 from recommender import DRRAgent
 """
@@ -31,12 +31,13 @@ if __name__ == "__main__":
     if args.modality:
         args.modality = tuple(args.modality.split(','))
     # Loading dataset
-    users_num, items_num, train_users_dict, users_history_lens, movies_id_to_movies = load_dataset(DATA_DIR, 'train')
+    # total_users_num, total_items_num, train_users_dict, users_history_lens, movies_id_to_movies = load_dataset(DATA_DIR, 'train')
+    total_users_num, total_items_num, train_users_dict, users_history_lens, movies_id_to_movies = load_dataset_session(DATA_DIR, 'train')
 
     env = OfflineEnv(train_users_dict, users_history_lens, movies_id_to_movies, STATE_SIZE)
     print(f"Available number of users: {len(env.available_users)}")
   
-    recommender = DRRAgent(env, int(users_num/0.8)+1, items_num, STATE_SIZE, args, use_wandb=False)
+    recommender = DRRAgent(env, total_users_num, total_items_num, STATE_SIZE, args, use_wandb=False)
     recommender.actor.build_networks()
     recommender.critic.build_networks()
     recommender.train(args.max_episode_num, load_model=False, top_k=TOP_K)
