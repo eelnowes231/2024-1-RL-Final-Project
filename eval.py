@@ -93,7 +93,7 @@ def calculate_ndcg(rel, irel):
 if __name__ == "__main__":
 
     # Loading dataset 
-    users_num, items_num, eval_users_dict, users_history_lens, movies_id_to_movies = load_dataset(DATA_DIR, 'test')
+    users_num, items_num, eval_users_dict, users_history_lens, movies_id_to_movies = load_dataset(DATA_DIR, 'eval')
 
     time.sleep(2)
 
