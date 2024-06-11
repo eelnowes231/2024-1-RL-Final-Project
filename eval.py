@@ -106,8 +106,8 @@ if __name__ == "__main__":
     total_users_num, total_items_num, eval_users_dict, users_history_lens, movies_id_to_movies = load_dataset_session(DATA_DIR, 'eval')
 
     #######################################################
-    saved_actor = f'./save_model/{args.saved_model_path}/actor_1000_fixed.h5'
-    saved_critic = f'./save_model/{args.saved_model_path}/critic_1000_fixed.h5'
+    saved_actor = f'./save_model/{args.save_path}/actor_{args.max_episode_num}_fixed.h5'
+    saved_critic = f'./save_model/{args.save_path}/critic_{args.max_episode_num}_fixed.h5'
 
     tf.keras.backend.set_floatx('float64')
 
