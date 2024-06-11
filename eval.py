@@ -96,6 +96,7 @@ if __name__ == "__main__":
     parser.add_argument('--fusion', type=str, help='Fusion')
     parser.add_argument('--aggregation', type=str, help='Aggregation')
     parser.add_argument('--max_episode_num', type=int, default=8000, help='Number of episodes')
+    parser.add_argument('--save_path', type=str, help='Saved model path')
     args = parser.parse_args()
     if args.modality:
         args.modality = tuple(args.modality.split(','))
@@ -104,8 +105,8 @@ if __name__ == "__main__":
     users_num, items_num, eval_users_dict, users_history_lens, movies_id_to_movies = load_dataset(DATA_DIR, 'eval')
 
     #######################################################
-    saved_actor = './save_model/trail-2024-06-11-16-30-52/actor_1000_fixed.h5'
-    saved_critic = './save_model/trail-2024-06-11-16-30-52/critic_1000_fixed.h5'
+    saved_actor = f'./save_model/{args.saved_model_path}/actor_1000_fixed.h5'
+    saved_critic = f'./save_model/{args.saved_model_path}/critic_1000_fixed.h5'
 
     tf.keras.backend.set_floatx('float64')
 
