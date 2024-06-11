@@ -1,5 +1,6 @@
 # Dependencies
 import os
+import argparse
 
 from data import load_dataset
 from envs import OfflineEnv
@@ -17,19 +18,26 @@ ROOT_DIR = os.getcwd()
 DATA_DIR = os.path.join(ROOT_DIR, 'data/ml-1m/')
 STATE_SIZE = 10
 TOP_K = 5
-MAX_EPISODE_NUM = 8000
 
 os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 
 if __name__ == "__main__":
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--modality', type=str, help='Modality')
+    parser.add_argument('--fusion', type=str, help='Fusion')
+    parser.add_argument('--aggregation', type=str, help='Aggregation')
+    parser.add_argument('--max_episode_num', type=int, default=8000, help='Number of episodes')
+    args = parser.parse_args()
+    if args.modality:
+        args.modality = tuple(args.modality.split(','))
     # Loading dataset
     users_num, items_num, train_users_dict, users_history_lens, movies_id_to_movies = load_dataset(DATA_DIR, 'train')
 
     env = OfflineEnv(train_users_dict, users_history_lens, movies_id_to_movies, STATE_SIZE)
     print(f"Available number of users: {len(env.available_users)}")
   
-    recommender = DRRAgent(env, users_num, items_num, STATE_SIZE, use_wandb=False)
+    recommender = DRRAgent(env, users_num, items_num,
+                           STATE_SIZE, args, use_wandb=False)
     recommender.actor.build_networks()
     recommender.critic.build_networks()
-    recommender.train(MAX_EPISODE_NUM, load_model=False, top_k=TOP_K)
+    recommender.train(args.max_episode_num, load_model=False, top_k=TOP_K)
