@@ -18,7 +18,6 @@ import argparse
 ROOT_DIR = os.getcwd()
 DATA_DIR = os.path.join(ROOT_DIR, 'data/ml-1m/')
 STATE_SIZE = 10
-TOP_K = 5
 LENGTH = 10
 
 def evaluate(recommender, env, check_movies: bool=False, top_k: int=1, length: int=1):
@@ -97,6 +96,7 @@ if __name__ == "__main__":
     parser.add_argument('--aggregation', type=str, help='Aggregation')
     parser.add_argument('--max_episode_num', type=int, default=8000, help='Number of episodes')
     parser.add_argument('--save_path', type=str, help='Saved model path')
+    parser.add_argument('--top_k', type=int, default=5, help='Top k items to recommend')
     args = parser.parse_args()
     if args.modality:
         args.modality = tuple(args.modality.split(','))
@@ -125,7 +125,7 @@ if __name__ == "__main__":
         recommender.actor.build_networks()
         recommender.critic.build_networks()
         recommender.load_model(saved_actor, saved_critic)
-        precision, ndcg, _ = evaluate(recommender, env, check_movies=True, top_k=TOP_K, length=LENGTH)
+        precision, ndcg, _ = evaluate(recommender, env, check_movies=True, top_k=args.top_k, length=LENGTH)
         sum_precision += precision
         sum_ndcg += ndcg
 
@@ -133,4 +133,4 @@ if __name__ == "__main__":
             break
 
     print("\n[FINAL RESULT]")
-    print(f'precision@{TOP_K} : {sum_precision/(end_evaluation)}, ndcg@{TOP_K} : {sum_ndcg/(end_evaluation)}')
+    print(f'precision@{args.top_k} : {sum_precision/(end_evaluation)}, ndcg@{args.top_k} : {sum_ndcg/(end_evaluation)}')

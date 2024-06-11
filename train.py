@@ -17,7 +17,6 @@ from recommender import DRRAgent
 ROOT_DIR = os.getcwd()
 DATA_DIR = os.path.join(ROOT_DIR, 'data/ml-1m/')
 STATE_SIZE = 10
-TOP_K = 5
 
 os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 
@@ -27,6 +26,7 @@ if __name__ == "__main__":
     parser.add_argument('--fusion', type=str, help='Fusion')
     parser.add_argument('--aggregation', type=str, help='Aggregation')
     parser.add_argument('--max_episode_num', type=int, default=8000, help='Number of episodes')
+    parser.add_argument('--top_k', type=int, default=5, help='Top k items to recommend')
     args = parser.parse_args()
     if args.modality:
         args.modality = tuple(args.modality.split(','))
@@ -40,4 +40,4 @@ if __name__ == "__main__":
     recommender = DRRAgent(env, total_users_num, total_items_num, STATE_SIZE, args, use_wandb=False)
     recommender.actor.build_networks()
     recommender.critic.build_networks()
-    recommender.train(args.max_episode_num, load_model=False, top_k=TOP_K)
+    recommender.train(args.max_episode_num, load_model=False, top_k=args.top_k)
