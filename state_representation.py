@@ -14,7 +14,8 @@ class DRRAveStateRepresentation(tf.keras.Model):
 
         # Define the weights manually
         weights = tf.constant([0.19, 0.17, 0.15, 0.13, 0.11, 0.09, 0.07, 0.05, 0.03, 0.01], dtype=tf.float32)
-        
+        weights = tf.cast(weights, items_eb.dtype)  # Cast to the same dtype as items_eb
+
         # Expand dimensions of weights to match items_eb for multiplication
         weights = tf.reshape(weights, (1, 1, 10))  # Shape (1, 1, 10)
         
