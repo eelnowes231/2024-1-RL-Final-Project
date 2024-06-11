@@ -71,8 +71,7 @@ class OfflineEnv(object):
             
             # reward를 받았으면, 잘 추천된 movie들을 history에 추가
             if max(rewards) > 0:
-                self.items = self.items[len(correctly_recommended):] + correctly_recommended
-
+                self.items = correctly_recommended + self.items[len(correctly_recommended):]
             reward = rewards
 
         else:
