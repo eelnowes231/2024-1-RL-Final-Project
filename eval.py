@@ -113,8 +113,11 @@ if __name__ == "__main__":
     sum_precision, sum_ndcg = 0, 0
 
     end_evaluation = 50
+    temp_env = OfflineEnv(eval_users_dict, users_history_lens, movies_id_to_movies, STATE_SIZE)
+    avaiable_users = temp_env.available_users
+    print(f"Available number of users: {len(avaiable_users)}")
 
-    for i, user_id in enumerate(eval_users_dict.keys()):
+    for i, user_id in enumerate(avaiable_users):
         env = OfflineEnv(eval_users_dict, users_history_lens, movies_id_to_movies, STATE_SIZE, fix_user_id=user_id)
 
         recommender = DRRAgent(env, total_users_num, total_items_num, STATE_SIZE, args, use_wandb=False)

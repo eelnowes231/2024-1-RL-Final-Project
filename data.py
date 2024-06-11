@@ -82,9 +82,6 @@ def load_dataset_session(DATA_DIR: str, mode: str="train"):
     # 유저별로 본 영화들 순서대로 정리
     users_dict = np.load(DATA_DIR + 'final_user_dict.npy', allow_pickle=True)
 
-    # 각 유저별 영화 히스토리 길이
-    users_history_lens = np.load(DATA_DIR + 'final_users_history_len.npy')
-
     total_users_num = len(users_dict.item()) 
     total_items_num = len(movies_df)
     print(f"total users_num : {total_users_num}, total items_num : {total_items_num}")
@@ -100,8 +97,10 @@ def load_dataset_session(DATA_DIR: str, mode: str="train"):
 
     if mode == 'train':
         users_dict = train_users_dict
+        users_history_lens = np.load(DATA_DIR + 'final_train_users_history_len.npy')
     else:
         users_dict = eval_users_dict
+        users_history_lens = np.load(DATA_DIR + 'final_eval_users_history_len.npy')
 
     return total_users_num, total_items_num, users_dict, users_history_lens, movies_id_to_movies  
 
