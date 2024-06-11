@@ -36,8 +36,7 @@ if __name__ == "__main__":
     env = OfflineEnv(train_users_dict, users_history_lens, movies_id_to_movies, STATE_SIZE)
     print(f"Available number of users: {len(env.available_users)}")
   
-    recommender = DRRAgent(env, users_num, items_num,
-                           STATE_SIZE, args, use_wandb=False)
+    recommender = DRRAgent(env, int(users_num/0.8)+1, items_num, STATE_SIZE, args, use_wandb=False)
     recommender.actor.build_networks()
     recommender.critic.build_networks()
     recommender.train(args.max_episode_num, load_model=False, top_k=TOP_K)

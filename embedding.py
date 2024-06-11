@@ -93,6 +93,8 @@ class UserMovieEmbedding(tf.keras.Model):
             mm_emb = []
             for mod in self.modality:
                 mm_feat = getattr(self, f'{mod}_feat')
+                x[1] = tf.cast(x[1], tf.int32)
+                x[0] = tf.cast(x[0], tf.int32)
                 mm_feat = tf.gather(mm_feat, x[1])
                 
                 if self.fusion == 'early':
