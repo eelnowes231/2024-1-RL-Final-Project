@@ -103,13 +103,11 @@ class DRRAgent:
             items_ids = np.array(
                 list(set(i for i in range(self.items_num)) - recommended_items))
 
-        items_ebs = self.embedding_network.get_layer(
-            'movie_embedding')(items_ids)
+        items_ebs = self.embedding_network.get_layer('movie_embedding')(items_ids)
         # items_ebs = self.m_embedding_network.get_layer('movie_embedding')(items_ids)
         action = tf.transpose(action, perm=(1, 0))
         if top_k:
-            item_indice = np.argsort(tf.transpose(tf.keras.backend.dot(
-                items_ebs, action), perm=(1, 0)))[0][-top_k:]
+            item_indice = np.argsort(tf.transpose(tf.keras.backend.dot(items_ebs, action), perm=(1, 0)))[0][-top_k:]
             return items_ids[item_indice]
         else:
             item_idx = np.argmax(tf.keras.backend.dot(items_ebs, action))
