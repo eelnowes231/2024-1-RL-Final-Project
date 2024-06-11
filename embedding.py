@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import os
 
 class MovieGenreEmbedding(tf.keras.Model):
     def __init__(self, len_movies, len_genres, embedding_dim):

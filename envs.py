@@ -1,19 +1,12 @@
 import numpy as np
 
 """
-[Training 방식]
-- 매 에피소드마다 user를 랜덤하게 선택 (OfflineEnv.user)
-- user의 최근에 본 영화 10개를 이용해 state 생성
-- user가 최근에 본 영화 10개를 제외한 나머지 영화들을 추천 (DRRAgent.recommend_item())
-- 한 user당 trajectory 최대 길이는 약 3000, 그 전에 user가 본 영화 history 길이만큼 추천받으면 종료(OfflineEnv.step()) 
-- Actor, Critic 파라미터 업데이트는 replay buffer에서 32개씩 batch로 묶어서 진행
-
 [수정해볼만한 것들]
-1. 4832 user에서 중복허용해서 random으로 8000명 뽑는 것 같음 -> 중복 허용하지 않고 1번 혹은 2번 씩 학습
+1. 중복허용해서 random으로 8000명 뽑는 것 같음 -> 중복 허용하지 않고 1번 혹은 2번 씩 학습
 2. user가 최근에 본 영화 10개를 이용해 state를 만드는 것 같은데, 개수를 수정하거나 최근 것에 더 가중치를 두도록 수정
 3. top_k로 수정
 4. history가 10개 보다 적은 user도 같이 학습. state 만드는 부분에 대한 수정이 필요해보임
-5. 언제나 item을 추천하기보다 아무것도 추천안하는 경우도 만들기? reward -0.5만. rating 1, 2 짜리 추천해주면 reward 더 떨어지니.
+5. 언제나 item을 추천하기보다 아무것도 추천안하는 경우도 만들기? reward -0.5만. rating 1짜리 추천해주면 reward 더 떨어지니.
 """
 
 class OfflineEnv(object):
@@ -59,9 +52,7 @@ class OfflineEnv(object):
         return self.user, self.items, self.done
         
     def step(self, action, top_k=False):
-        
         reward = -0.5       # time step마다 -0.5 reward
-
         if top_k:
             correctly_recommended = []
             rewards = []
@@ -102,7 +93,7 @@ class OfflineEnv(object):
         # 추천받은 item 개수가 user의 history 길이보다 크거나 같은지는 왜 체크하지? -> 같아지면 더 이상 추천할 영화 없음
         if len(self.recommended_items) > self.done_count or len(self.recommended_items) >= self.users_history_lens[self.user]:
             self.done = True
-            
+
         # self.items : 이게 state가 만약 적절한 추천을 해줬다면 다음 self.items에 추가되었을 것이고 state만드는데 사용됨
         return self.items, reward, self.done, self.recommended_items
 

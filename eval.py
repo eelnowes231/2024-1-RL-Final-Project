@@ -6,6 +6,7 @@ import pandas as pd
 from envs import OfflineEnv
 from recommender import DRRAgent
 from data import load_dataset
+import argparse
 """
 [Evaluation 방식 - Offline Evaluation (Algorithm 2)]
 - eval_user_list에서 한명씩 평가진행
@@ -91,17 +92,21 @@ def calculate_ndcg(rel, irel):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--modality', type=str, help='Modality')
+    parser.add_argument('--fusion', type=str, help='Fusion')
+    parser.add_argument('--aggregation', type=str, help='Aggregation')
+    parser.add_argument('--max_episode_num', type=int, default=8000, help='Number of episodes')
+    args = parser.parse_args()
+    if args.modality:
+        args.modality = tuple(args.modality.split(','))
 
     # Loading dataset 
-    users_num, items_num, eval_users_dict, users_history_lens, movies_id_to_movies = load_dataset(DATA_DIR, 'test')
-
-    time.sleep(2)
+    users_num, items_num, eval_users_dict, users_history_lens, movies_id_to_movies = load_dataset(DATA_DIR, 'eval')
 
     #######################################################
-    saved_actor = './save_model/trail-2024-06-10-16-48-58/actor_8000_fixed.h5'
-    saved_critic = './save_model/trail-2024-06-10-16-48-58/critic_8000_fixed.h5'
-    saved_actor = './save_model/backup/actor_8000_fixed.h5'
-    saved_critic = './save_model/backup/critic_8000_fixed.h5'
+    saved_actor = './save_model/trail-2024-06-11-16-30-52/actor_1000_fixed.h5'
+    saved_critic = './save_model/trail-2024-06-11-16-30-52/critic_1000_fixed.h5'
 
     tf.keras.backend.set_floatx('float64')
 
@@ -112,7 +117,7 @@ if __name__ == "__main__":
     for i, user_id in enumerate(eval_users_dict.keys()):
         env = OfflineEnv(eval_users_dict, users_history_lens, movies_id_to_movies, STATE_SIZE, fix_user_id=user_id)
 
-        recommender = DRRAgent(env, users_num, items_num, STATE_SIZE)
+        recommender = DRRAgent(env, 6039, items_num, STATE_SIZE, args, use_wandb=False)
         recommender.actor.build_networks()
         recommender.critic.build_networks()
         recommender.load_model(saved_actor, saved_critic)
