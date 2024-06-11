@@ -75,9 +75,15 @@ class DRRAgent:
         
         ### Item - ID + Multimodal Embedding ###
         self.embedding_network = UserMovieEmbedding_ID_MM_CONCAT(id_embedding_network, mm_embedding_network)
-
+        
+        if args.modality:
+            mod_name = ''.join([mod[0] for mod in args.modality]).upper()
+            model_name = f'{mod_name}_{args.fusion}_{args.aggregation}'
+        else:
+            model_name = 'ID'
         self.save_model_weight_dir = ROOT_DIR + \
-            f"/save_model/trail-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
+            f"/save_model/{model_name}-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
+            
         if not os.path.exists(self.save_model_weight_dir):
             os.makedirs(os.path.join(self.save_model_weight_dir, 'images'))
         self.srm_ave = DRRAveStateRepresentation(self.embedding_dim)
