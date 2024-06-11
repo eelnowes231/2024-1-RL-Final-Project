@@ -21,7 +21,7 @@ class OfflineEnv(object):
     def __init__(self, users_dict, users_history_lens, movies_id_to_movies, state_size, fix_user_id=None):
 
         self.users_dict = users_dict                    # user_id : [(movie_id, rating), ...] -> 총 4832 user, id는 1부터 시작, 앞에 있는 movie가 최근에 본 movie
-        self.users_history_lens = users_history_lens    # user_id 별 history 길이
+        self.users_history_lens = users_history_lens    # user_id 별 positive로 체크한 history 길이
         self.items_id_to_name = movies_id_to_movies     # movie_id : (title, genre)
         
         self.state_size = state_size                    # state size = 10 : 최근에 본 movie의 개수 기준 설정 
@@ -70,7 +70,7 @@ class OfflineEnv(object):
                 if act in self.user_items.keys() and act not in self.recommended_items:
                     correctly_recommended.append(act)
                     rating = self.user_items[act]
-                    rewards.append((rating-2))
+                    rewards.append((rating-3)/2)    # rating 1, 2, 3, 4, 5를 [-1, 1]로 정규화
                 else:
                     # 추천한 movie가 user가 봤던 history에 없거나, 최근 본 10개 중에 있다면
                     rewards.append(-0.5)
@@ -100,7 +100,7 @@ class OfflineEnv(object):
         # 추천받은 item개수가 done_count보다 크거나, 추천받은 item 개수가 user의 history 길이보다 크거나 같다면
         # self.user -1 인 이유는 user id가 1부터 시작해서
         # 추천받은 item 개수가 user의 history 길이보다 크거나 같은지는 왜 체크하지? -> 같아지면 더 이상 추천할 영화 없음
-        if len(self.recommended_items) > self.done_count or len(self.recommended_items) >= self.users_history_lens[self.user-1]:
+        if len(self.recommended_items) > self.done_count or len(self.recommended_items) >= self.users_history_lens[self.user]:
             self.done = True
             
         # self.items : 이게 state가 만약 적절한 추천을 해줬다면 다음 self.items에 추가되었을 것이고 state만드는데 사용됨
