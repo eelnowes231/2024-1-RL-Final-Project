@@ -37,9 +37,8 @@ def evaluate(recommender, env, check_movies: bool=False, top_k: int=1, length: i
         print(f'user_id : {user_id}, rated_items_length:{len(env.user_items)}')
 
     while not done:
-        # Embedding        
-        user_eb = recommender.embedding_network.get_layer('user_embedding')(np.array(user_id))
-        items_eb = recommender.embedding_network.get_layer('movie_embedding')(np.array(items_ids))
+        # Embedding
+        user_eb, items_eb = recommender.embedding_network.get_embedding([np.array(user_id), np.array(items_ids)])
 
         # SRM state        
         state = recommender.srm_ave([np.expand_dims(user_eb, axis=0), np.expand_dims(items_eb, axis=0)])
