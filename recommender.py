@@ -84,8 +84,6 @@ class DRRAgent:
         self.save_model_weight_dir = ROOT_DIR + \
             f"/save_model/{model_name}-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
             
-        if not os.path.exists(self.save_model_weight_dir):
-            os.makedirs(os.path.join(self.save_model_weight_dir, 'images'))
         self.srm_ave = DRRAveStateRepresentation(self.embedding_dim)
         # self.srm_ave([np.zeros((1, 100,)), np.zeros((1, state_size, 100))])
 
@@ -257,6 +255,8 @@ class DRRAgent:
 
             if (episode+1) % 50 == 0:
                 plt.plot(episodic_precision_history)
+                if not os.path.exists(self.save_model_weight_dir):
+                    os.makedirs(os.path.join(self.save_model_weight_dir, 'images'))
                 plt.savefig(os.path.join(self.save_model_weight_dir,
                             f'images/training_precision_%_top_5.png'))
 
